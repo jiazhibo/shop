@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IUserDao接口方法提供sql语句配置 -->
+<mapper namespace="com.aishang.dao.ICategoryDao">
+
+
+    <resultMap id="aLLCAndCs" type="CategoryExt">
+        <id property="cid" column="cid"></id>
+        <result property="cname" column="cname"></result>
+        <!--collection 1:n-->
+        <collection property="categorySecondExtList" ofType="CategorySecondExt">
+            <id property="csid" column="csid"></id>
+            <result property="csname" column="csname"></result>
+        </collection>
+        <!--association 1:1-->
+       <!-- <association property="categorySecondExtList" javaType="CategorySecondExt">
+            <id property="csid" column="csid"></id>
+            <result property="csname" column="csname"></result>
+        </association>-->
+    </resultMap>
+
+    <!--查询全部类目-->
+    <select id="findALLCAndCs" resultMap="aLLCAndCs">
+        SELECT * from category c LEFT JOIN categorysecond cs on c.cid=cs.cid
+    </select>
+
+
+
+    <!--查询某个一级类目下6个热门商品-->
+    <select id="findHProductByCid" resultType="Product" parameterType="int">
+        SELECT * from category c LEFT JOIN categorysecond cs on c.cid=cs.cid
+        INNER JOIN product p on cs.csid=p.csid WHERE c.cid=#{cid} and p.is_hot=1
+        ORDER BY p.pdate desc LIMIT 6
+    </select>
+
+
+
+</mapper>

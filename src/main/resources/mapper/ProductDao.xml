@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IUserDao接口方法提供sql语句配置 -->
+<mapper namespace="com.aishang.dao.IProductDao">
+
+    <!--查询某个一级类目下全部商品-->
+    <select id="findProductByCid" resultType="Product" parameterType="com.aishang.util.PageBeanForProduct">
+        select * from category c left join categorysecond cs on c.cid=cs.cid
+        inner join product p on p.csid=cs.csid where c.cid=#{cid}
+        limit #{start},#{pageSize}
+    </select>
+
+    <!--查询某个一级类目下3个热门商品-->
+    <select id="findProductHByCid" resultType="Product" parameterType="int">
+        select * from category c left join categorysecond cs on c.cid=cs.cid
+        inner join product p on p.csid=cs.csid where c.cid=#{cid} and p.is_hot=1
+        limit 3
+    </select>
+
+    <!--查询某个类目下的总商品数量-->
+    <select id="findRowCountByCid" resultType="int" parameterType="int">
+        select count(*) from category c left join categorysecond cs on c.cid=cs.cid
+        inner join product p on p.csid=cs.csid where c.cid=#{cid}
+    </select>
+
+    <!--查询某个二级类目下全部商品-->
+    <select id="findProductByCsid" parameterType="com.aishang.util.PageBeanForProduct" resultType="Product">
+        select * from categorysecond cs
+        INNER JOIN product p on p.csid=cs.csid WHERE cs.csid=#{csid} limit #{start},#{pageSize}
+    </select>
+
+    <!--查询某个二级类目下3个热门商品-->
+    <select id="findProductHByCsid" parameterType="int" resultType="Product">
+        select * from categorysecond cs
+        INNER JOIN product p on p.csid=cs.csid WHERE cs.csid=#{csid} and p.is_hot=1 limit 3
+    </select>
+
+    <!--查询某个类目下的总商品数量-->
+    <select id="findRowCountByCsid" resultType="int" parameterType="int">
+        select count(*) from categorysecond cs
+        inner join product p on p.csid=cs.csid where cs.csid=#{csid}
+    </select>
+
+    <!--查询商品-->
+    <select id="findProductByPname" parameterType="com.aishang.util.PageBeanForProduct" resultType="Product">
+        select *
+        from product
+        <where>
+            <if test="pName!=null and pName!=''">
+                pname like '%${pName}%'
+            </if>
+        </where>
+        limit #{start},#{pageSize}
+    </select>
+
+    <!--查询商品下三个热门商品-->
+    <select id="findProductHByPname" parameterType="String" resultType="Product">
+        select *
+        from product
+        <where>
+            <if test="value!=null and value!=''">
+                pname like '%${value}%'
+            </if>
+        </where>
+        limit 3
+    </select>
+
+    <!--搜索商品，统计商品数量-->
+    <select id="findRowCountByPname" parameterType="String" resultType="int">
+        select count(pid)
+        from product
+        <where>
+            <if test="value!=null and value!=''">
+                pname like '%${value}%'
+            </if>
+        </where>
+    </select>
+
+    <!--商品详情-->
+    <select id="findProductByPid" parameterType="int" resultType="Product">
+        select *
+        from product
+        where pid = #{pid}
+    </select>
+
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IOrderDao接口方法提供sql语句配置 -->
+<mapper namespace="com.aishang.dao.IOrderDao">
+    <!-- 创建订单 -->
+    <insert id="createOrder" parameterType="order">
+        <selectKey keyProperty="oid" resultType="int" order="AFTER">
+            select LAST_INSERT_ID();
+        </selectKey>
+
+        insert into orders(total,ordertime,state,name,phone,addr,uid)
+        values (#{total},#{ordertime},#{state},#{name},#{phone},#{addr},#{uid})
+
+    </insert>
+
+    <!-- 创建订单项 -->
+    <insert id="createOrderItem" parameterType="orderItem">
+            insert into orderitem(count,subtotal,pid,oid)
+            values (#{count},#{subtotal},#{pid},#{oid})
+    </insert>
+
+    <!-- 修改订单状态 -->
+    <update id="updateOstate" parameterType="order">
+        update orders set state = #{state} where oid=#{oid}
+    </update>
+
+    <!-- 查询订单详情 -->
+    <resultMap id="orderExt" type="orderExt">
+
+        <id column="oid" property="oid"></id>
+        <result column="total" property="total"></result>
+        <result column="ordertime" property="ordertime"></result>
+        <result column="state" property="state"></result>
+        <result column="name" property="name"></result>
+        <result column="phone" property="phone"></result>
+        <result column="addr" property="addr"></result>
+        <result column="uid" property="uid"></result>
+        <collection property="orderItemExts" ofType="OrderItemExt">
+            <id column="itemid" property="itemid"></id>
+            <result column="count" property="count"></result>
+            <result column="subtotal" property="subtotal"></result>
+            <result column="pid" property="pid"></result>
+            <result column="oid" property="oid"></result>
+            <association property="product" javaType="product">
+                <id column="pid" property="pid"></id>
+                <result column="pname" property="pname"></result>
+                <result column="market_price" property="market_price"></result>
+                <result column="shop_price" property="shop_price"></result>
+                <result column="image" property="image"></result>
+                <result column="pdesc" property="pdesc"></result>
+                <result column="is_hot" property="is_hot"></result>
+                <result column="pdate" property="pdate"></result>
+                <result column="csid" property="csid"></result>
+
+
+            </association>
+
+        </collection>
+
+    </resultMap>
+
+    <select id="findOrderByOid" parameterType="int" resultMap="orderExt">
+        select * from orders o inner join orderitem oi on o.oid=oi.oid
+        inner join product p on p.pid = oi.pid where o.oid=#{oid}
+    </select>
+    <!--查询所有订单-->
+    <select id="findOrderByUid" parameterType="com.aishang.util.PageBeanForOrder" resultMap="orderExt">
+        select * from (select * from orders where uid=#{uid} ORDER BY ordertime desc limit #{start},#{pageSize}) o inner join orderitem oi on o.oid=oi.oid
+        inner join product p on p.pid = oi.pid
+    </select>
+    <!--查询所有订单数量-->
+    <select id="findOrderCByUid" parameterType="int" resultType="int">
+        select count(oid) from orders WHERE uid=#{uid}
+    </select>
+
+
+</mapper>
+
